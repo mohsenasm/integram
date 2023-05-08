@@ -1,23 +1,24 @@
 package integram
 
 import (
-	"github.com/requilence/url"
-	"reflect"
-	"testing"
-	"time"
-
-	"github.com/gin-gonic/gin"
-	mgo "gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
-	tg "github.com/requilence/telegram-bot-api"
 	"image"
 	"image/color"
 	"image/draw"
 	"image/png"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
+	"testing"
+	"time"
+
+	"github.com/requilence/url"
+
+	"github.com/gin-gonic/gin"
+	tg "github.com/requilence/telegram-bot-api"
+	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 func TestBot_PMURL(t *testing.T) {
@@ -1260,8 +1261,8 @@ func TestIncomingMessage_SetCallbackAction(t *testing.T) {
 		args   args
 		want   *IncomingMessage
 	}{
-		{"set from empty", fields{Message: Message{Text: "text", BotID: 1111, ChatID: 1000}}, args{dumbFuncWithContextAndParam, []interface{}{true}}, &IncomingMessage{Message: Message{Text: "text", BotID: 1111, ChatID: 1000, OnCallbackAction: "github.com/requilence/integram.dumbFuncWithContextAndParam", OnCallbackData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 13, 255, 130, 0, 1, 4, 98, 111, 111, 108, 2, 2, 0, 1}}}},
-		{"override exists value", fields{Message: Message{Text: "text", BotID: 1111, ChatID: 1000}}, args{dumbFuncWithContextAndParams, []interface{}{1, 2}}, &IncomingMessage{Message: Message{Text: "text", BotID: 1111, ChatID: 1000, OnCallbackAction: "github.com/requilence/integram.dumbFuncWithContextAndParams", OnCallbackData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 20, 255, 130, 0, 2, 3, 105, 110, 116, 4, 2, 0, 2, 3, 105, 110, 116, 4, 2, 0, 4}}}},
+		{"set from empty", fields{Message: Message{Text: "text", BotID: 1111, ChatID: 1000}}, args{dumbFuncWithContextAndParam, []interface{}{true}}, &IncomingMessage{Message: Message{Text: "text", BotID: 1111, ChatID: 1000, OnCallbackAction: "github.com/mohsenasm/integram.dumbFuncWithContextAndParam", OnCallbackData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 13, 255, 130, 0, 1, 4, 98, 111, 111, 108, 2, 2, 0, 1}}}},
+		{"override exists value", fields{Message: Message{Text: "text", BotID: 1111, ChatID: 1000}}, args{dumbFuncWithContextAndParams, []interface{}{1, 2}}, &IncomingMessage{Message: Message{Text: "text", BotID: 1111, ChatID: 1000, OnCallbackAction: "github.com/mohsenasm/integram.dumbFuncWithContextAndParams", OnCallbackData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 20, 255, 130, 0, 2, 3, 105, 110, 116, 4, 2, 0, 2, 3, 105, 110, 116, 4, 2, 0, 4}}}},
 	}
 	for _, tt := range tests {
 		m := &IncomingMessage{
@@ -1332,7 +1333,7 @@ func TestOutgoingMessage_SetCallbackAction(t *testing.T) {
 		args   args
 		want   *OutgoingMessage
 	}{
-		{"set from empty", fields{Message: Message{Text: "text", BotID: 1111, ChatID: 1000}}, args{dumbFuncWithContextAndParam, []interface{}{true}}, &OutgoingMessage{Message: Message{Text: "text", BotID: 1111, ChatID: 1000, OnCallbackAction: "github.com/requilence/integram.dumbFuncWithContextAndParam", OnCallbackData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 13, 255, 130, 0, 1, 4, 98, 111, 111, 108, 2, 2, 0, 1}}}},
+		{"set from empty", fields{Message: Message{Text: "text", BotID: 1111, ChatID: 1000}}, args{dumbFuncWithContextAndParam, []interface{}{true}}, &OutgoingMessage{Message: Message{Text: "text", BotID: 1111, ChatID: 1000, OnCallbackAction: "github.com/mohsenasm/integram.dumbFuncWithContextAndParam", OnCallbackData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 13, 255, 130, 0, 1, 4, 98, 111, 111, 108, 2, 2, 0, 1}}}},
 	}
 	for _, tt := range tests {
 		m := &OutgoingMessage{
@@ -1403,7 +1404,7 @@ func TestIncomingMessage_SetReplyAction(t *testing.T) {
 		args   args
 		want   *IncomingMessage
 	}{
-		{"set from empty", fields{Message: Message{Text: "text", BotID: 1111, ChatID: 1000}}, args{dumbFuncWithContextAndParam, []interface{}{true}}, &IncomingMessage{Message: Message{Text: "text", BotID: 1111, ChatID: 1000, OnReplyAction: "github.com/requilence/integram.dumbFuncWithContextAndParam", OnReplyData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 13, 255, 130, 0, 1, 4, 98, 111, 111, 108, 2, 2, 0, 1}}}},
+		{"set from empty", fields{Message: Message{Text: "text", BotID: 1111, ChatID: 1000}}, args{dumbFuncWithContextAndParam, []interface{}{true}}, &IncomingMessage{Message: Message{Text: "text", BotID: 1111, ChatID: 1000, OnReplyAction: "github.com/mohsenasm/integram.dumbFuncWithContextAndParam", OnReplyData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 13, 255, 130, 0, 1, 4, 98, 111, 111, 108, 2, 2, 0, 1}}}},
 	}
 	for _, tt := range tests {
 		m := &IncomingMessage{
@@ -1474,7 +1475,7 @@ func TestOutgoingMessage_SetReplyAction(t *testing.T) {
 		args   args
 		want   *OutgoingMessage
 	}{
-		{"set from empty", fields{Message: Message{Text: "text", BotID: 1111, ChatID: 1000}}, args{dumbFuncWithContextAndParam, []interface{}{true}}, &OutgoingMessage{Message: Message{Text: "text", BotID: 1111, ChatID: 1000, OnReplyAction: "github.com/requilence/integram.dumbFuncWithContextAndParam", OnReplyData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 13, 255, 130, 0, 1, 4, 98, 111, 111, 108, 2, 2, 0, 1}}}},
+		{"set from empty", fields{Message: Message{Text: "text", BotID: 1111, ChatID: 1000}}, args{dumbFuncWithContextAndParam, []interface{}{true}}, &OutgoingMessage{Message: Message{Text: "text", BotID: 1111, ChatID: 1000, OnReplyAction: "github.com/mohsenasm/integram.dumbFuncWithContextAndParam", OnReplyData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 13, 255, 130, 0, 1, 4, 98, 111, 111, 108, 2, 2, 0, 1}}}},
 	}
 	for _, tt := range tests {
 		m := &OutgoingMessage{
@@ -1532,7 +1533,7 @@ func TestMessage_SetCallbackAction(t *testing.T) {
 		args   args
 		want   *Message
 	}{
-		{"set from empty", fields{Text: "text", BotID: 1111, ChatID: 1000}, args{dumbFuncWithContextAndParam, []interface{}{true}}, &Message{Text: "text", BotID: 1111, ChatID: 1000, OnCallbackAction: "github.com/requilence/integram.dumbFuncWithContextAndParam", OnCallbackData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 13, 255, 130, 0, 1, 4, 98, 111, 111, 108, 2, 2, 0, 1}}},
+		{"set from empty", fields{Text: "text", BotID: 1111, ChatID: 1000}, args{dumbFuncWithContextAndParam, []interface{}{true}}, &Message{Text: "text", BotID: 1111, ChatID: 1000, OnCallbackAction: "github.com/mohsenasm/integram.dumbFuncWithContextAndParam", OnCallbackData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 13, 255, 130, 0, 1, 4, 98, 111, 111, 108, 2, 2, 0, 1}}},
 	}
 	for _, tt := range tests {
 		m := &Message{
@@ -1592,7 +1593,7 @@ func TestMessage_SetReplyAction(t *testing.T) {
 		args   args
 		want   *Message
 	}{
-		{"set from empty", fields{Text: "text", BotID: 1111, ChatID: 1000}, args{dumbFuncWithContextAndParam, []interface{}{true}}, &Message{Text: "text", BotID: 1111, ChatID: 1000, OnReplyAction: "github.com/requilence/integram.dumbFuncWithContextAndParam", OnReplyData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 13, 255, 130, 0, 1, 4, 98, 111, 111, 108, 2, 2, 0, 1}}},
+		{"set from empty", fields{Text: "text", BotID: 1111, ChatID: 1000}, args{dumbFuncWithContextAndParam, []interface{}{true}}, &Message{Text: "text", BotID: 1111, ChatID: 1000, OnReplyAction: "github.com/mohsenasm/integram.dumbFuncWithContextAndParam", OnReplyData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 13, 255, 130, 0, 1, 4, 98, 111, 111, 108, 2, 2, 0, 1}}},
 	}
 	for _, tt := range tests {
 		m := &Message{
@@ -2400,7 +2401,7 @@ func TestMessage_Update(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-	// TODO: Add test cases.
+		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		m := &Message{

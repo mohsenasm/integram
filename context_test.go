@@ -1,28 +1,28 @@
 package integram
 
 import (
-	uurl "net/url"
-	"reflect"
-	"testing"
-	"time"
-
 	"bytes"
+	"crypto/md5"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	log "github.com/sirupsen/logrus"
-	"github.com/gin-gonic/gin"
-	"github.com/mrjones/oauth"
-	"github.com/requilence/url"
-	"golang.org/x/oauth2"
-	"gopkg.in/mgo.v2"
-	tg "github.com/requilence/telegram-bot-api"
 	"io"
 	"net/http"
+	uurl "net/url"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
-	"crypto/md5"
+	"testing"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/mrjones/oauth"
+	tg "github.com/requilence/telegram-bot-api"
+	"github.com/requilence/url"
+	log "github.com/sirupsen/logrus"
+	"golang.org/x/oauth2"
+	"gopkg.in/mgo.v2"
 )
 
 func TestContext_SetServiceBaseURL(t *testing.T) {
@@ -70,7 +70,6 @@ func TestContext_SetServiceBaseURL(t *testing.T) {
 			t.Errorf("%q. Context.SetServiceBaseURL() = %v, want %v", tt.name, c, tt.want)
 		}
 	}
-
 }
 
 func TestContext_SaveOAuthProvider(t *testing.T) {
@@ -185,9 +184,11 @@ func TestOAuthProvider_OAuth1Client(t *testing.T) {
 	type args struct {
 		c *Context
 	}
-	oAuth1Consumer := oauth.NewConsumer("ID", "SECRET", oauth.ServiceProvider{RequestTokenUrl: "https://sub.example.com/1/OAuthGetRequestToken",
+	oAuth1Consumer := oauth.NewConsumer("ID", "SECRET", oauth.ServiceProvider{
+		RequestTokenUrl:   "https://sub.example.com/1/OAuthGetRequestToken",
 		AuthorizeTokenUrl: "https://sub.example.com/1/OAuthAuthorizeToken",
-		AccessTokenUrl:    "https://sub.example.com/1/OAuthGetAccessToken"})
+		AccessTokenUrl:    "https://sub.example.com/1/OAuthGetAccessToken",
+	})
 	oAuth1Consumer.AdditionalAuthorizationUrlParams = map[string]string{
 		"name":       "Integram",
 		"expiration": "never",
@@ -290,7 +291,7 @@ func TestWebhookContext_Headers(t *testing.T) {
 		fields fields
 		want   map[string][]string
 	}{
-		{"some headers", fields{gin: &gin.Context{Request: &http.Request{Header: http.Header{"a1": []string{"v1"}, "a2": []string{"v2", "v3"}}}}}, map[string][]string{"a1": []string{"v1"}, "a2": []string{"v2", "v3"}}},
+		{"some headers", fields{gin: &gin.Context{Request: &http.Request{Header: http.Header{"a1": []string{"v1"}, "a2": []string{"v2", "v3"}}}}}, map[string][]string{"a1": {"v1"}, "a2": {"v2", "v3"}}},
 		{"no headers", fields{gin: &gin.Context{Request: &http.Request{}}}, nil},
 	}
 	for _, tt := range tests {
@@ -397,7 +398,6 @@ func TestContext_KeyboardAnswer(t *testing.T) {
 }
 
 func TestContext_Log(t *testing.T) {
-
 	type fields struct {
 		ServiceName           string
 		ServiceBaseURL        url.URL
@@ -436,7 +436,6 @@ func TestContext_Log(t *testing.T) {
 			t.Errorf("%q. Context.Log() = %+v, want %+v", tt.name, got.Data, tt.want.Data)
 		}
 	}
-
 }
 
 func TestContext_Db(t *testing.T) {
@@ -667,7 +666,7 @@ func TestContext_EditPressedMessageText(t *testing.T) {
 		time.Sleep(time.Millisecond * 1000)
 
 		msg, _ := findMessageByBsonID(db, msg.ID)
-		textHash:=fmt.Sprintf(fmt.Sprintf("%x", md5.Sum([]byte(tt.args.text))))
+		textHash := fmt.Sprintf(fmt.Sprintf("%x", md5.Sum([]byte(tt.args.text))))
 		if msg.om.TextHash != textHash {
 			t.Errorf("%q. Context.EditPressedMessageText() db check got text hash = %s, want %s", tt.name, msg.om.TextHash, textHash)
 		}
@@ -896,9 +895,9 @@ func TestContext_EditMessageText(t *testing.T) {
 		}
 		time.Sleep(time.Millisecond * 100)
 		msg, _ := findMessageByBsonID(db, msg.ID)
-		textHash:=fmt.Sprintf(fmt.Sprintf("%x", md5.Sum([]byte(tt.args.text))))
+		textHash := fmt.Sprintf(fmt.Sprintf("%x", md5.Sum([]byte(tt.args.text))))
 
-		if msg.om.TextHash !=  textHash {
+		if msg.om.TextHash != textHash {
 			t.Errorf("%q. Context.EditMessageText() db check got text hash = %s, want %s", tt.name, msg.om.TextHash, textHash)
 		}
 
@@ -996,7 +995,7 @@ func TestContext_EditMessagesWithEventID(t *testing.T) {
 		wantErr    bool
 	}{
 		{"test1", fields{ServiceName: "servicewithbottoken", db: db, User: User{ID: chatID}, Chat: Chat{ID: chatID}}, args{msg.EventID[0], "kbstateval", fmt.Sprintf("EditMessagesTextWithEventID: edited msg with event id <b>%s</b> 1", msg.EventID[0]), msg.om.InlineKeyboardMarkup}, 1, false},
-		{"test2", fields{ServiceName: "servicewithbottoken", db: db, User: User{ID: chatID}, Chat: Chat{ID: chatID}}, args{msg.EventID[0], "",           fmt.Sprintf("EditMessagesTextWithEventID: edited msg with event id <b>%s</b> 2", msg.EventID[0]), msg.om.InlineKeyboardMarkup}, 2, false},
+		{"test2", fields{ServiceName: "servicewithbottoken", db: db, User: User{ID: chatID}, Chat: Chat{ID: chatID}}, args{msg.EventID[0], "", fmt.Sprintf("EditMessagesTextWithEventID: edited msg with event id <b>%s</b> 2", msg.EventID[0]), msg.om.InlineKeyboardMarkup}, 2, false},
 	}
 	for _, tt := range tests {
 		c := &Context{
@@ -1491,7 +1490,7 @@ func TestContext_DownloadURL(t *testing.T) {
 		wantFileSha1 string
 		wantErr      bool
 	}{
-		{"good URL", fields{ServiceName: "servicewithbottoken", User: User{ID: 9999999999}, Chat: Chat{ID: -9999999999}}, args{"https://raw.githubusercontent.com/Requilence/integram/master/LICENSE"}, "fe3eea6c599e23a00c08c5f5cb2320c30adc8f8687db5fcec9b79a662c53ff6b", false},
+		{"good URL", fields{ServiceName: "servicewithbottoken", User: User{ID: 9999999999}, Chat: Chat{ID: -9999999999}}, args{"https://raw.githubusercontent.com/mohsenasm/integram/master/LICENSE"}, "fe3eea6c599e23a00c08c5f5cb2320c30adc8f8687db5fcec9b79a662c53ff6b", false},
 		{"bad URL", fields{ServiceName: "servicewithbottoken", User: User{ID: 9999999999}, Chat: Chat{ID: -9999999999}}, args{"http://integram.org/bad"}, "", true},
 	}
 	for _, tt := range tests {

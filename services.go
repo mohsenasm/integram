@@ -24,9 +24,12 @@ import (
 )
 
 const standAloneServicesFileName = "standAloneServices.json"
+
 // Map of Services configs per name. See Register func
-var serviceMapMutex = sync.RWMutex{}
-var services = make(map[string]*Service)
+var (
+	serviceMapMutex = sync.RWMutex{}
+	services        = make(map[string]*Service)
+)
 
 // Mapping job.Type by job alias names specified in service's config
 type jobTypePerJobName map[string]*jobs.Type
@@ -57,8 +60,8 @@ type Service struct {
 
 	JobsPool int // Worker pool to be created for service. Default to 1 worker. Workers will be inited only if jobs types are available
 
-	JobOldPrefix 	string
-	Jobs []Job // Job types that can be scheduled
+	JobOldPrefix string
+	Jobs         []Job // Job types that can be scheduled
 
 	Modules []Module // you can inject modules and use it across different services
 
@@ -140,7 +143,6 @@ type DefaultOAuth2 struct {
 }
 
 func servicesHealthChecker() {
-
 	defer func() {
 		if r := recover(); r != nil {
 			log.Errorf("HealthChecker panic recovered %v", r)
@@ -153,17 +155,14 @@ func servicesHealthChecker() {
 	for true {
 
 		err := healthCheck(s.DB(mongo.Database))
-
 		if err != nil {
 			log.Errorf("HealthChecker main, error: %s", err.Error())
 		}
 
 		if Config.IsMainInstance() {
-
-			for serviceName, _ := range services {
+			for serviceName := range services {
 
 				resp, err := http.Get(fmt.Sprintf("%s/%s/healthcheck", Config.BaseURL, serviceName))
-
 				if err != nil {
 					log.Errorf("HealthChecker %s, network error: %s", serviceName, err.Error())
 					continue
@@ -174,7 +173,6 @@ func servicesHealthChecker() {
 
 				if resp.StatusCode != 200 {
 					b, err := ioutil.ReadAll(resp.Body)
-
 					if err != nil {
 						log.Errorf("HealthChecker %s, status %d, read error: %s", serviceName, resp.StatusCode, err.Error())
 					}
@@ -190,11 +188,9 @@ func servicesHealthChecker() {
 }
 
 func healthCheck(db *mgo.Database) error {
-
 	err := db.Session.Ping()
 	if err != nil {
 		return fmt.Errorf("DB fault: %s", err)
-
 	}
 
 	_, err = jobs.FindById("fake")
@@ -212,7 +208,6 @@ func healthCheck(db *mgo.Database) error {
 }
 
 func init() {
-
 	jobs.Config.Db.Address = Config.RedisURL
 	if Config.IsMainInstance() {
 		err := loadStandAloneServicesFromFile()
@@ -254,7 +249,6 @@ func beforeJob(ch chan bool, job *jobs.Job, args *[]reflect.Value) {
 	s := mongoSession.Clone()
 
 	for i := 0; i < len(*args); i++ {
-
 		if (*args)[i].Kind() == reflect.Ptr && (*args)[i].Type().String() == "*integram.Context" {
 			ctx := (*args)[i].Interface().(*Context)
 
@@ -277,7 +271,6 @@ type Servicer interface {
 }
 
 func ensureStandAloneService(serviceName string, machineURL string, botToken string) error {
-
 	log.Infof("Service '%s' discovered: %s", serviceName, machineURL)
 	s, _ := serviceByName(serviceName)
 
@@ -298,7 +291,6 @@ func ensureStandAloneService(serviceName string, machineURL string, botToken str
 	reverseProxiesMapMutex.Unlock()
 
 	err := s.registerBot(botToken)
-
 	if err != nil {
 		log.WithError(err).Error("Service Ensure: registerBot error")
 	}
@@ -313,7 +305,6 @@ func ensureStandAloneService(serviceName string, machineURL string, botToken str
 
 func loadStandAloneServicesFromFile() error {
 	b, err := ioutil.ReadFile(Config.ConfigDir + string(os.PathSeparator) + standAloneServicesFileName)
-
 	if err != nil {
 		return err
 	}
@@ -335,13 +326,11 @@ func loadStandAloneServicesFromFile() error {
 		}
 
 		err := s.registerBot(es.BotToken)
-
 		if err != nil {
 			log.WithError(err).Error("loadStandAloneServicesFromFile: registerBot error")
 		}
 	}
 	return nil
-
 }
 
 type externalService struct {
@@ -356,12 +345,11 @@ func saveStandAloneServicesToFile() error {
 	}
 
 	jsonData, err := json.Marshal(m)
-
 	if err != nil {
 		return err
 	}
 
-	return ioutil.WriteFile(Config.ConfigDir + string(os.PathSeparator) + standAloneServicesFileName, jsonData, 0655)
+	return ioutil.WriteFile(Config.ConfigDir+string(os.PathSeparator)+standAloneServicesFileName, jsonData, 0655)
 }
 
 func (s *Service) getShortFuncPath(actionFunc interface{}) string {
@@ -372,15 +360,15 @@ func (s *Service) getShortFuncPath(actionFunc interface{}) string {
 	return s.trimFuncPath(fullPath)
 }
 
-func (s *Service) trimFuncPath(fullPath string) string{
+func (s *Service) trimFuncPath(fullPath string) string {
 	// Trim funcPath for a specific service name and determined service's rootPackagePath
-	// trello, github.com/requilence/integram/services/trello, github.com/requilence/integram/services/trello.cardReplied -> trello.cardReplied
-	// trello, github.com/requilence/integram/services/Trello, github.com/requilence/integram/services/Trello.cardReplied -> trello.cardReplied
+	// trello, github.com/mohsenasm/integram/services/trello, github.com/mohsenasm/integram/services/trello.cardReplied -> trello.cardReplied
+	// trello, github.com/mohsenasm/integram/services/Trello, github.com/mohsenasm/integram/services/Trello.cardReplied -> trello.cardReplied
 	// trello, github.com/requilence/trelloRepo, _/var/integram/trello.cardReplied -> trello.cardReplied
 	// trello, github.com/requilence/trelloRepo, _/var/integram/another.cardReplied -> trello.cardReplied
-	// trello, github.com/requilence/integram/services/trello, github.com/requilence/integram/services/trello/another.action -> trello/another.action
-	// trello, github.com/requilence/integram/services/trello, _/var/integram/trello.cardReplied -> trello.cardReplied
-	// trello, trello.cardReplied, github.com/requilence/integram/services/trello.cardReplied -> trello.cardReplied
+	// trello, github.com/mohsenasm/integram/services/trello, github.com/mohsenasm/integram/services/trello/another.action -> trello/another.action
+	// trello, github.com/mohsenasm/integram/services/trello, _/var/integram/trello.cardReplied -> trello.cardReplied
+	// trello, trello.cardReplied, github.com/mohsenasm/integram/services/trello.cardReplied -> trello.cardReplied
 	if s.rootPackagePath != "" && strings.HasPrefix(fullPath, s.rootPackagePath) {
 		internalFuncPath := strings.TrimPrefix(fullPath, s.rootPackagePath)
 		return s.Name + internalFuncPath
@@ -402,7 +390,7 @@ func (s *Service) trimFuncPath(fullPath string) string{
 
 // Register the service's config and corresponding botToken
 func Register(servicer Servicer, botToken string) {
-	//jobs.Config.Db.Address="192.168.1.101:6379"
+	// jobs.Config.Db.Address="192.168.1.101:6379"
 	db := mongoSession.Clone().DB(mongo.Database)
 	service := servicer.Service()
 	err := migrations(db, service.Name)
@@ -417,7 +405,7 @@ func Register(servicer Servicer, botToken string) {
 		}
 		service.DefaultBaseURL = *URLMustParse(service.DefaultOAuth1.AccessTokenURL)
 
-		//mongoSession.DB(mongo.Database).C("users").EnsureIndex(mgo.Index{Key: []string{"settings." + service.Name + ".oauth_redirect_token"}})
+		// mongoSession.DB(mongo.Database).C("users").EnsureIndex(mgo.Index{Key: []string{"settings." + service.Name + ".oauth_redirect_token"}})
 	} else if service.DefaultOAuth2 != nil {
 		service.DefaultBaseURL = *URLMustParse(service.DefaultOAuth2.Endpoint.AuthURL)
 	}
@@ -443,7 +431,7 @@ func Register(servicer Servicer, botToken string) {
 			pool.SetAfterFunc(afterJob)
 		}
 
-		//log.Infof("%s: workers pool [%d] is ready", service.Name, service.JobsPool)
+		// log.Infof("%s: workers pool [%d] is ready", service.Name, service.JobsPool)
 
 		jobsPerService[service.Name] = make(map[string]*jobs.Type)
 
@@ -467,7 +455,7 @@ func Register(servicer Servicer, botToken string) {
 			for i := 0; i < handlerType.NumIn(); i++ {
 				argType := handlerType.In(i)
 				if argType.Kind() == reflect.Ptr {
-					//argType = argType.Elem()
+					// argType = argType.Elem()
 				}
 
 				if argType.Kind() == reflect.Interface {
@@ -483,7 +471,7 @@ func Register(servicer Servicer, botToken string) {
 
 			jobType, err := jobs.RegisterTypeWithPoolKey(jobName, "_"+service.Name, job.Retries, job.HandlerFunc)
 			if err != nil {
-				fmt.Errorf("RegisterTypeWithPoolKey '%s', for %s: %s", jobName, service.Name, err.Error() )
+				fmt.Errorf("RegisterTypeWithPoolKey '%s', for %s: %s", jobName, service.Name, err.Error())
 			} else {
 				jobsPerService[service.Name][jobName] = jobType
 			}
@@ -504,7 +492,6 @@ func Register(servicer Servicer, botToken string) {
 				log.Panicf("Can't start jobs pool: %v\n", err)
 			}
 			log.Infof("%s service: workers pool [%d] started", service.Name, service.JobsPool)
-
 		}(pool, service)
 
 	}
@@ -517,7 +504,7 @@ func Register(servicer Servicer, botToken string) {
 			for i := 0; i < actionFuncType.NumIn(); i++ {
 				argType := actionFuncType.In(i)
 				if argType.Kind() == reflect.Ptr {
-					//argType = argType.Elem()
+					// argType = argType.Elem()
 				}
 
 				gob.Register(reflect.Zero(argType).Interface())
@@ -544,11 +531,9 @@ func Register(servicer Servicer, botToken string) {
 	if service.TGNewMessageHandler == nil && service.TGInlineQueryHandler == nil {
 		return
 	}
-
 }
 
 func ServiceWorkerAutorespawnGoroutine(s *Service) {
-
 	c := s.EmptyContext()
 	defer func() {
 		if r := recover(); r != nil {

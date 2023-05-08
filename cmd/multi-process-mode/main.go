@@ -9,10 +9,8 @@
 
 package main
 
-import "github.com/requilence/integram"
+import "github.com/mohsenasm/integram"
 
-
-func main(){
+func main() {
 	integram.Run()
 }
-

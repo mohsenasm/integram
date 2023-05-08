@@ -1,20 +1,20 @@
 package integram
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 	"reflect"
+	"strconv"
+	"strings"
 	"testing"
 	"time"
 
-	"fmt"
 	"github.com/gin-gonic/gin"
+	tg "github.com/requilence/telegram-bot-api"
 	"github.com/requilence/url"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	tg "github.com/requilence/telegram-bot-api"
-	"strings"
-	"os"
-	"strconv"
 )
 
 func clearData() {
@@ -28,8 +28,8 @@ func clearData() {
 	db.C("chats").RemoveId(9999999999)
 	db.C("chats").RemoveId(-9999999999)
 }
-func TestUser_Cache(t *testing.T) {
 
+func TestUser_Cache(t *testing.T) {
 	type s struct {
 		A int
 		B bool
@@ -270,7 +270,6 @@ func TestUser_IsPrivateStarted(t *testing.T) {
 	}
 	db.C("users").RemoveId(9999999999)
 	db.C("messages").RemoveId(msg.ID)
-
 }
 
 func TestUser_SetCache(t *testing.T) {
@@ -326,7 +325,6 @@ func TestUser_SetCache(t *testing.T) {
 		exists := user.Cache(tt.args.key, &sOut)
 		if exists != tt.wantExists {
 			t.Errorf("%q. User.SetCache() exists = %v, wantExists %v", tt.name, exists, tt.wantExists)
-
 		}
 		if tt.wantExists && !reflect.DeepEqual(tt.args.val, sOut) {
 			t.Errorf("%q. User.SetCache() = %v, want %v", tt.name, sOut, tt.args.val)
@@ -391,7 +389,6 @@ func TestChat_SetCache(t *testing.T) {
 		exists := chat.Cache(tt.args.key, &sOut)
 		if exists != tt.wantExists {
 			t.Errorf("%q. User.SetCache() exists = %v, wantExists %v", tt.name, exists, tt.wantExists)
-
 		}
 		if tt.wantExists && !reflect.DeepEqual(tt.args.val, sOut) {
 			t.Errorf("%q. User.SetCache() = %v, want %v", tt.name, sOut, tt.args.val)
@@ -457,7 +454,6 @@ func TestContext_SetServiceCache(t *testing.T) {
 		exists := c.ServiceCache(tt.args.key, &sOut)
 		if exists != tt.wantExists {
 			t.Errorf("%q. Context.ServiceCache() exists = %v, wantExists %v", tt.name, exists, tt.wantExists)
-
 		}
 		if tt.wantExists && !reflect.DeepEqual(tt.args.val, sOut) {
 			t.Errorf("%q. Context.ServiceCache() = %v, want %v", tt.name, sOut, tt.args.val)
@@ -666,7 +662,8 @@ func TestChat_Settings(t *testing.T) {
 		{"test3", fields{ID: -9999999999, ctx: c1}, args{&c1Out}, false, &s1{struct {
 			A int
 			B bool
-		}{555, true}, 555555, "str"}}}
+		}{555, true}, 555555, "str"}},
+	}
 	for _, tt := range tests {
 		chat := &Chat{
 			ID:        tt.fields.ID,
@@ -917,7 +914,6 @@ func TestChat_SaveSettings(t *testing.T) {
 		}
 	}
 	db.C("chats").RemoveId(-9999999999)
-
 }
 
 func TestUser_SaveSettings(t *testing.T) {
@@ -997,7 +993,6 @@ func TestUser_SaveSettings(t *testing.T) {
 	}
 
 	db.C("users").RemoveId(9999999999)
-
 }
 
 func TestUser_ServiceHookToken(t *testing.T) {
@@ -1275,7 +1270,6 @@ func TestChat_SaveSetting(t *testing.T) {
 
 	}
 	db.C("chats").RemoveId(-9999999999)
-
 }
 
 func TestUser_SaveSetting(t *testing.T) {
@@ -1343,7 +1337,6 @@ func TestUser_SaveSetting(t *testing.T) {
 		}
 	}
 	db.C("users").RemoveId(9999999999)
-
 }
 
 type fakeStrGenerator struct {
@@ -1354,6 +1347,7 @@ func (f fakeStrGenerator) Get(n int) string {
 	fmt.Println("!!!:" + f.Value)
 	return f.Value
 }
+
 func TestUser_AuthTempToken(t *testing.T) {
 	fstr := &fakeStrGenerator{Value: "fake"}
 
@@ -1501,7 +1495,6 @@ func TestUser_OauthInitURL(t *testing.T) {
 		}
 		if got := user.OauthInitURL(); got != tt.want {
 			t.Errorf("%q. User.OauthInitURL() = %v, want %v", tt.name, got, tt.want)
-
 		}
 		db.C("users").RemoveId(tt.fields.ID)
 		db.C("users_cache").RemoveAll(bson.M{"userid": tt.fields.ID})
@@ -1524,7 +1517,7 @@ func TestUser_OAuthHTTPClient(t *testing.T) {
 		fields fields
 		want   *http.Client
 	}{
-	// TODO: Add test cases.
+		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		user := &User{
@@ -1687,8 +1680,8 @@ func TestUser_SetAfterAuthAction(t *testing.T) {
 		wantUserData *userData
 		wantErr      bool
 	}{
-		{"set from empty", fields{ID: 9999999999, ctx: &Context{db: db, ServiceName: "servicewithoauth2"}}, args{dumbFuncWithContextAndParam, []interface{}{true}}, &userData{Protected: map[string]*userProtected{"servicewithoauth2": {AfterAuthHandler: "github.com/requilence/integram.dumbFuncWithContextAndParam", AfterAuthData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 13, 255, 130, 0, 1, 4, 98, 111, 111, 108, 2, 2, 0, 1}}}}, false},
-		{"override exists value", fields{ID: 9999999999, ctx: &Context{db: db, ServiceName: "servicewithoauth2"}}, args{dumbFuncWithContextAndParams, []interface{}{1, 2}}, &userData{Protected: map[string]*userProtected{"servicewithoauth2": {AfterAuthHandler: "github.com/requilence/integram.dumbFuncWithContextAndParams", AfterAuthData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 20, 255, 130, 0, 2, 3, 105, 110, 116, 4, 2, 0, 2, 3, 105, 110, 116, 4, 2, 0, 4}}}}, false},
+		{"set from empty", fields{ID: 9999999999, ctx: &Context{db: db, ServiceName: "servicewithoauth2"}}, args{dumbFuncWithContextAndParam, []interface{}{true}}, &userData{Protected: map[string]*userProtected{"servicewithoauth2": {AfterAuthHandler: "github.com/mohsenasm/integram.dumbFuncWithContextAndParam", AfterAuthData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 13, 255, 130, 0, 1, 4, 98, 111, 111, 108, 2, 2, 0, 1}}}}, false},
+		{"override exists value", fields{ID: 9999999999, ctx: &Context{db: db, ServiceName: "servicewithoauth2"}}, args{dumbFuncWithContextAndParams, []interface{}{1, 2}}, &userData{Protected: map[string]*userProtected{"servicewithoauth2": {AfterAuthHandler: "github.com/mohsenasm/integram.dumbFuncWithContextAndParams", AfterAuthData: []byte{12, 255, 129, 2, 1, 2, 255, 130, 0, 1, 16, 0, 0, 20, 255, 130, 0, 2, 3, 105, 110, 116, 4, 2, 0, 2, 3, 105, 110, 116, 4, 2, 0, 4}}}}, false},
 	}
 	for _, tt := range tests {
 		user := &User{
@@ -1706,7 +1699,6 @@ func TestUser_SetAfterAuthAction(t *testing.T) {
 			t.Errorf("%q. User.SetAfterAuthAction() error = %v, wantErr %v", tt.name, err, tt.wantErr)
 		}
 		if !reflect.DeepEqual(user.data.Protected, tt.wantUserData.Protected) {
-
 			t.Errorf("%q. User.SetAfterAuthAction() = %v, want %v", tt.name, user.data.Protected, tt.wantUserData.Protected)
 		}
 
@@ -1717,7 +1709,6 @@ func TestUser_SetAfterAuthAction(t *testing.T) {
 			t.Errorf("%q. User.SetAfterAuthAction() from DB = %v, want %v", tt.name, user.data.Protected, tt.wantUserData.Protected)
 		}
 	}
-
 }
 
 func TestContext_WebPreview(t *testing.T) {

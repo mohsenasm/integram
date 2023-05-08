@@ -3,13 +3,14 @@
 package feedback
 
 import (
+	"errors"
 	"fmt"
-	"github.com/requilence/integram"
+	"math/rand"
 	"time"
 
+	"github.com/mohsenasm/integram"
+
 	"github.com/kelseyhightower/envconfig"
-	"math/rand"
-	"errors"
 )
 
 var FeedbackModule = integram.Module{
@@ -83,7 +84,6 @@ func feedbackEdited(c *integram.Context, feedbackID string) error {
 	}
 
 	return nil
-
 }
 
 func formatFeedbackMessage(text string, ctx *integram.Context) string {
@@ -106,7 +106,6 @@ func formatFeedbackMessage(text string, ctx *integram.Context) string {
 }
 
 func askForFeedbackReplied(c *integram.Context) error {
-
 	if c.Message.Text == "" {
 		return c.NewMessage().
 			SetReplyToMsgID(c.Message.MsgID).
@@ -120,7 +119,7 @@ func askForFeedbackReplied(c *integram.Context) error {
 
 	c.User.Cache("feedbackID", &feedbackID)
 
-	var texts = []feedbackMsg{}
+	texts := []feedbackMsg{}
 	if feedbackID == "" {
 		feedbackID = randStr(10)
 		c.User.SetCache("feedbackID", feedbackID, time.Hour*24)
@@ -139,7 +138,6 @@ func askForFeedbackReplied(c *integram.Context) error {
 
 	if len(texts) > 1 {
 		_, err := c.EditMessagesTextWithEventID("fb_"+feedbackID, formatFeedbackMessage(joinedText, c))
-
 		if err != nil {
 			c.Log().WithError(err).Error("askForFeedbackReplied EditMessagesTextWithEventID error")
 		}

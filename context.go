@@ -903,6 +903,7 @@ func (c *Context) AnswerCallbackQuery(text string, showAlert bool) error {
 func (c *Context) NewMessage() *OutgoingMessage {
 	bot := c.Bot()
 	msg := &OutgoingMessage{}
+	msg.SetSilent(true)
 	msg.BotID = bot.ID
 	msg.FromID = bot.ID
 	msg.WebPreview = true
